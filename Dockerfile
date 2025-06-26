@@ -27,31 +27,30 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
     -o main cmd/shortener/main.go
 
 # Stage 2: Production stage
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 # Install runtime dependencies
-RUN apk --no-cache add ca-certificates tzdata sqlite wget && \
-    rm -rf /var/cache/apk/*
-
-# Create non-root user
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates tzdata sqlite3 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
 # Copy binary from builder stage
-COPY --from=builder /app/main .
+COPY --from=builder /app/main ./main
 
 # Copy static assets and migrations
 COPY --from=builder /app/web ./web
 COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/configs ./configs
 
-# Create data directory for SQLite and set permissions
-RUN mkdir -p /app/data && \
+# Create non-root user and data directory
+RUN groupadd --system appgroup && \
+    useradd --system --no-create-home --ingroup appgroup appuser && \
+    mkdir -p /app/data && \
     chown -R appuser:appgroup /app && \
-    chmod +x /app/main
+    chmod +x ./main
 
 # Switch to non-root user
 USER appuser
@@ -59,9 +58,8 @@ USER appuser
 # Expose port
 EXPOSE 8081
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:8081/health || exit 1
+# Start the application
+CMD ["./main"]
 
 # Run the application
 CMD ["./main"]
