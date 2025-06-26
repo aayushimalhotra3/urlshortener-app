@@ -1,6 +1,6 @@
 # Multi-stage build for production
 # Stage 1: Build stage
-FROM golang:1.23-slim AS builder
+FROM golang:1.23 AS builder
 
 # Install build dependencies
 RUN apt-get update && \
