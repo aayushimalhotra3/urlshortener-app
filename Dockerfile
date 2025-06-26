@@ -3,7 +3,7 @@
 FROM golang:1.23-alpine AS builder
 
 # Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata gcc musl-dev sqlite-dev
+RUN apk add --no-cache git ca-certificates tzdata gcc musl-dev sqlite-dev build-base
 
 # Set working directory
 WORKDIR /app
@@ -19,7 +19,7 @@ COPY . .
 
 # Build the application with optimizations
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
-    -ldflags='-w -s -extldflags "-static"' \
+    -ldflags='-w -s' \
     -a -installsuffix cgo \
     -o main cmd/shortener/main.go
 
