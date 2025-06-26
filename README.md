@@ -216,10 +216,32 @@ GET /metrics
 |----------|-------------|----------|
 | `PORT` | Server port | `8081` |
 | `DB_PATH` | SQLite database path | `./urls.db` |
+| `BASE_URL` | **CRITICAL**: Base URL for shortened links | `http://localhost:8080` |
 | `GIN_MODE` | Gin mode (debug/release) | `debug` |
 | `RATE_LIMIT_RPS` | Rate limit requests per second | `10` |
 | `RATE_LIMIT_BURST` | Rate limit burst size | `20` |
 | `MAX_URL_LENGTH` | Maximum URL length | `2048` |
+
+### ⚠️ Important: BASE_URL Configuration
+
+**The `BASE_URL` environment variable is critical for production deployments.** If not set correctly, your shortened URLs will point to `localhost` and won't work from other machines.
+
+**For Production:**
+```bash
+# Render
+BASE_URL=https://your-app-name.onrender.com
+
+# Custom domain
+BASE_URL=https://yourdomain.com
+
+# Other platforms
+BASE_URL=https://your-actual-domain.com
+```
+
+**For Local Development:**
+```bash
+BASE_URL=http://localhost:8081
+```
 
 ### Security Configuration
 

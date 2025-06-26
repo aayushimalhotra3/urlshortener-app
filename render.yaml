@@ -29,6 +29,8 @@ services:
         value: 2048
       - key: DB_PATH
         value: /tmp/urlshortener.db
+      - key: BASE_URL
+        value: https://urlshortener-8lkx.onrender.com
       - key: REQUIRE_HTTPS
         value: true
     

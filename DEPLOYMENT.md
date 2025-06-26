@@ -54,6 +54,7 @@ Create a `.env` file for production:
 # Application
 PORT=8081
 DB_PATH=/app/data/urls.db
+BASE_URL=https://your-domain.com  # IMPORTANT: Set to your actual domain
 GIN_MODE=release
 
 # Security
