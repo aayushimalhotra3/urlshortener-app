@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const urlForm = document.getElementById('url-form');
     const urlInput = document.getElementById('url-input');
+    const shortenBtn = document.getElementById('shorten-btn');
     const resultContainer = document.getElementById('result-container');
     const shortUrlInput = document.getElementById('short-url');
     const copyBtn = document.getElementById('copy-btn');
@@ -8,9 +9,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.getElementById('error-message');
     const historyList = document.getElementById('history-list');
     const historyContainer = document.getElementById('history-container');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const toastContainer = document.getElementById('toast-container');
 
     // Load history from localStorage
     loadHistory();
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        toastContainer.appendChild(toast);
+        
+        // Trigger animation
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Loading state functions
+    function showLoading() {
+        loadingOverlay.style.display = 'flex';
+        shortenBtn.disabled = true;
+        shortenBtn.classList.add('loading');
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+        shortenBtn.disabled = false;
+        shortenBtn.classList.remove('loading');
+    }
+
+    // Enhanced URL validation
+    function isValidUrl(string) {
+        try {
+            const url = new URL(string);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch (_) {
+            return false;
+        }
+    }
 
     // Handle form submission
     urlForm.addEventListener('submit', async function(e) {
@@ -21,10 +69,22 @@ document.addEventListener('DOMContentLoaded', function() {
         errorContainer.style.display = 'none';
         
         const url = urlInput.value.trim();
+        
+        // Enhanced validation
         if (!url) {
             showError('Please enter a URL');
+            showToast('URL is required', 'error');
             return;
         }
+        
+        if (!isValidUrl(url)) {
+            showError('Please enter a valid URL (must start with http:// or https://)');
+            showToast('Invalid URL format', 'error');
+            return;
+        }
+        
+        // Show loading state
+        showLoading();
         
         try {
             const response = await fetch('/shorten', {
@@ -39,10 +99,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Try to parse JSON error response
                 try {
                     const errorData = await response.json();
-                    showError(errorData.error || 'Failed to shorten URL');
+                    const errorMsg = errorData.error || 'Failed to shorten URL';
+                    showError(errorMsg);
+                    showToast(errorMsg, 'error');
                 } catch {
                     // If JSON parsing fails, show generic error
-                    showError('Failed to shorten URL');
+                    const errorMsg = 'Failed to shorten URL';
+                    showError(errorMsg);
+                    showToast(errorMsg, 'error');
                 }
                 return;
             }
@@ -59,23 +123,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 shortened: data.short_url
             });
             
+            // Show success message
+            showToast('URL shortened successfully! 🎉');
+            
+            // Clear input
+            urlInput.value = '';
+            
         } catch (error) {
-            showError('Network error. Please try again.');
+            const errorMsg = 'Network error. Please check your connection and try again.';
+            showError(errorMsg);
+            showToast(errorMsg, 'error');
             console.error('Error:', error);
+        } finally {
+            // Always hide loading state
+            hideLoading();
         }
     });
     
-    // Handle copy button
-    copyBtn.addEventListener('click', function() {
-        shortUrlInput.select();
-        document.execCommand('copy');
-        
-        // Show feedback
-        const originalText = copyBtn.textContent;
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => {
-            copyBtn.textContent = originalText;
-        }, 2000);
+    // Handle copy button with modern clipboard API
+    copyBtn.addEventListener('click', async function() {
+        try {
+            await navigator.clipboard.writeText(shortUrlInput.value);
+            
+            // Show feedback
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.backgroundColor = '#27ae60';
+            
+            // Show toast notification
+            showToast('URL copied to clipboard! 📋');
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.backgroundColor = '';
+            }, 2000);
+        } catch (err) {
+            // Fallback for older browsers
+            try {
+                shortUrlInput.select();
+                document.execCommand('copy');
+                
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copied!';
+                copyBtn.style.backgroundColor = '#27ae60';
+                
+                showToast('URL copied to clipboard! 📋');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.backgroundColor = '';
+                }, 2000);
+            } catch (fallbackErr) {
+                showToast('Failed to copy URL. Please copy manually.', 'error');
+                console.error('Copy failed:', fallbackErr);
+            }
+        }
     });
     
     // Function to show error
@@ -128,18 +230,46 @@ document.addEventListener('DOMContentLoaded', function() {
             const copyButton = document.createElement('button');
             copyButton.className = 'history-item-copy';
             copyButton.textContent = 'Copy';
-            copyButton.addEventListener('click', function() {
-                navigator.clipboard.writeText(item.shortened)
-                    .then(() => {
-                        const originalText = copyButton.textContent;
+            copyButton.addEventListener('click', async function() {
+                try {
+                    await navigator.clipboard.writeText(item.shortened);
+                    
+                    // Show feedback
+                    copyButton.textContent = 'Copied!';
+                    copyButton.style.backgroundColor = '#27ae60';
+                    
+                    // Show toast notification
+                    showToast('URL copied to clipboard! 📋');
+                    
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy';
+                        copyButton.style.backgroundColor = '';
+                    }, 2000);
+                } catch (err) {
+                    // Fallback for older browsers
+                    try {
+                        // Create temporary input to select and copy
+                        const tempInput = document.createElement('input');
+                        tempInput.value = item.shortened;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                        
                         copyButton.textContent = 'Copied!';
+                        copyButton.style.backgroundColor = '#27ae60';
+                        
+                        showToast('URL copied to clipboard! 📋');
+                        
                         setTimeout(() => {
-                            copyButton.textContent = originalText;
+                            copyButton.textContent = 'Copy';
+                            copyButton.style.backgroundColor = '';
                         }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy: ', err);
-                    });
+                    } catch (fallbackErr) {
+                        showToast('Failed to copy URL. Please copy manually.', 'error');
+                        console.error('Copy failed:', fallbackErr);
+                    }
+                }
             });
             
             li.appendChild(urlSpan);

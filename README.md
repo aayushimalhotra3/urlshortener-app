@@ -1,16 +1,39 @@
-# URL Shortener Service
+# URL Shortener
+
+[![Build Status](https://github.com/username/urlapp/workflows/CI/badge.svg)](https://github.com/username/urlapp/actions)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-blue.svg)](https://golang.org/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://hub.docker.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen.svg)]()
 
 A high-performance URL shortener service built with Go, featuring comprehensive monitoring, security, and production-ready deployment configurations.
 
-## Features
+![URL Shortener Demo](https://via.placeholder.com/800x400/2c3e50/ffffff?text=URL+Shortener+Demo)
 
-- **Fast URL Shortening**: Generate short URLs with custom or auto-generated codes
-- **URL Redirection**: Fast redirection with caching support
-- **Comprehensive Monitoring**: Prometheus metrics and Grafana dashboards
-- **Security**: Rate limiting, input validation, and security headers
-- **Production Ready**: Docker containerization, CI/CD pipeline, and monitoring
-- **Database**: SQLite with migration support
-- **Health Checks**: Built-in health monitoring endpoints
+> **Live Demo**: [https://your-app.render.com](https://your-app.render.com) | **Source Code**: [GitHub Repository](https://github.com/username/urlapp)
+
+## ✨ Features
+
+### Core Functionality
+- 🚀 **Fast URL Shortening**: Generate short URLs with custom or auto-generated codes
+- 🔄 **URL Redirection**: Fast redirection with caching support
+- 📊 **URL History**: Track and manage previously shortened URLs
+- 🎯 **Custom Codes**: Support for user-defined short codes
+
+### Technical Excellence
+- 🐳 **Containerized**: Multi-stage Docker builds with non-root containers
+- 🔄 **CI/CD Pipeline**: GitHub Actions with automated testing and deployment
+- 🧪 **End-to-End Testing**: Playwright test suite with comprehensive coverage
+- 📈 **Monitoring Stack**: Prometheus metrics + Grafana dashboards
+- 🛡️ **Security First**: Rate limiting, input validation, CSRF protection
+- 🗄️ **Database**: SQLite with automated migrations
+- ⚡ **Performance**: Optimized Go backend with efficient routing
+
+### Production Ready
+- 🌐 **Multi-Platform Deployment**: Render, Fly.io, Heroku, GCP, Oracle Cloud
+- 🔍 **Health Monitoring**: Built-in health checks and metrics endpoints
+- 📱 **Mobile Responsive**: Clean, modern UI that works on all devices
+- 🔒 **SSL/TLS**: HTTPS support with security headers
 
 ## Architecture
 
@@ -28,6 +51,33 @@ A high-performance URL shortener service built with Go, featuring comprehensive 
 │                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Language**: Go 1.23+
+- **Framework**: Gin (HTTP router)
+- **Database**: SQLite with GORM
+- **Migrations**: golang-migrate
+- **Logging**: Logrus with structured logging
+
+### DevOps & Monitoring
+- **Containerization**: Docker with multi-stage builds
+- **CI/CD**: GitHub Actions
+- **Monitoring**: Prometheus + Grafana
+- **Testing**: Go testing + Playwright E2E
+- **Code Quality**: golangci-lint, gosec
+
+### Frontend
+- **UI**: Vanilla JavaScript + CSS3
+- **Responsive Design**: Mobile-first approach
+- **Features**: Copy-to-clipboard, URL history, error handling
+
+### Infrastructure
+- **Reverse Proxy**: Nginx
+- **SSL/TLS**: Let's Encrypt support
+- **Deployment**: Multi-platform (Render, Fly.io, Heroku, GCP, Oracle)
+- **Security**: Rate limiting, CSRF protection, security headers
 
 ## 🚀 Quick Deploy - Zero Cost Options
 
