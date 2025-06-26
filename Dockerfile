@@ -46,8 +46,8 @@ COPY --from=builder /app/migrations ./migrations
 COPY --from=builder /app/configs ./configs
 
 # Create non-root user and data directory
-RUN groupadd --system appgroup && \
-    useradd --system --no-create-home --ingroup appgroup appuser && \
+RUN addgroup --system appgroup && \
+    adduser --system --no-create-home --ingroup appgroup appuser && \
     mkdir -p /app/data && \
     chown -R appuser:appgroup /app && \
     chmod +x ./main
