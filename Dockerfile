@@ -56,7 +56,7 @@ RUN addgroup --system appgroup && \
 USER appuser
 
 # Expose port
-EXPOSE 8081
+EXPOSE 10000
 
 # Start the application
 CMD ["./main"]

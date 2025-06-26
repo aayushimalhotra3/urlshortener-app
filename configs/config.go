@@ -13,7 +13,7 @@ type Config struct {
 
 // LoadConfig loads configuration from environment variables
 func LoadConfig() *Config {
-	serverPort := getEnv("SERVER_PORT", "8080")
+	serverPort := getEnv("PORT", "8080")
 	dbPath := getEnv("DB_PATH", "./urlshortener.db")
 	baseURL := getEnv("BASE_URL", "http://localhost:8080")
 
