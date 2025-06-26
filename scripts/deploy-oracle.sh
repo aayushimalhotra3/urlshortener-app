@@ -28,24 +28,66 @@ fi
 
 echo -e "${GREEN}✅ Running as root${NC}"
 
-# Update system
-echo -e "\n${BLUE}📦 Updating system packages...${NC}"
-apt update && apt upgrade -y
-
-# Install required packages
-echo -e "\n${BLUE}📦 Installing required packages...${NC}"
-apt install -y \
-    docker.io \
-    docker-compose \
-    nginx \
-    certbot \
-    python3-certbot-nginx \
-    ufw \
-    curl \
-    wget \
-    git \
-    htop \
-    unzip
+# Detect OS and update system
+echo -e "\n${BLUE}📦 Detecting operating system...${NC}"
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux
+    if command -v apt &> /dev/null; then
+        echo -e "${GREEN}✅ Detected Ubuntu/Debian${NC}"
+        echo -e "\n${BLUE}📦 Updating system packages...${NC}"
+        apt update && apt upgrade -y
+        
+        echo -e "\n${BLUE}📦 Installing required packages...${NC}"
+        apt install -y \
+            docker.io \
+            docker-compose \
+            nginx \
+            certbot \
+            python3-certbot-nginx \
+            ufw \
+            curl \
+            wget \
+            git \
+            htop \
+            unzip
+    elif command -v yum &> /dev/null; then
+        echo -e "${GREEN}✅ Detected CentOS/RHEL${NC}"
+        echo -e "\n${BLUE}📦 Updating system packages...${NC}"
+        yum update -y
+        
+        echo -e "\n${BLUE}📦 Installing required packages...${NC}"
+        yum install -y \
+            docker \
+            docker-compose \
+            nginx \
+            certbot \
+            python3-certbot-nginx \
+            firewalld \
+            curl \
+            wget \
+            git \
+            htop \
+            unzip
+    else
+        echo -e "${RED}❌ Unsupported Linux distribution${NC}"
+        exit 1
+    fi
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    echo -e "${RED}❌ This script is designed for Oracle Cloud Linux instances${NC}"
+    echo -e "${YELLOW}⚠️  You're running macOS. This script should be run on your Oracle Cloud VM.${NC}"
+    echo -e "\n${BLUE}📋 To deploy on Oracle Cloud:${NC}"
+    echo "1. Create an Oracle Cloud Always Free account"
+    echo "2. Launch an ARM-based compute instance (Ubuntu 20.04+)"
+    echo "3. Copy this project to the instance:"
+    echo "   scp -r . oracle-user@your-instance-ip:/tmp/urlapp"
+    echo "4. SSH to the instance and run:"
+    echo "   ssh oracle-user@your-instance-ip"
+    echo "   sudo /tmp/urlapp/scripts/deploy-oracle.sh"
+    exit 1
+else
+    echo -e "${RED}❌ Unsupported operating system: $OSTYPE${NC}"
+    exit 1
+fi
 
 # Start and enable Docker
 echo -e "\n${BLUE}🐳 Setting up Docker...${NC}"
