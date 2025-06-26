@@ -1,0 +1,79 @@
+# Fly.io configuration for URL Shortener
+# Free tier: 3 shared-cpu-1x 256mb VMs
+
+app = "urlshortener-app"
+primary_region = "ord"  # Chicago - change to your preferred region
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8081"
+  GIN_MODE = "release"
+  DB_PATH = "/app/data/urls.db"
+  LOG_LEVEL = "info"
+  METRICS_ENABLED = "true"
+  RATE_LIMIT_RPS = "10"
+  RATE_LIMIT_BURST = "20"
+  MAX_URL_LENGTH = "2048"
+
+[experimental]
+  auto_rollback = true
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8081
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "1s"
+    restart_limit = 0
+
+  [[services.http_checks]]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "1s"
+    method = "get"
+    path = "/health"
+    protocol = "http"
+    restart_limit = 0
+
+    [services.http_checks.headers]
+      User-Agent = "Fly Health Check"
+
+# Persistent volume for SQLite database
+[[mounts]]
+  source = "urlshortener_data"
+  destination = "/app/data"
+
+# Resource allocation (free tier limits)
+[vm]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+# Auto-scaling configuration
+[scaling]
+  min_machines = 1
+  max_machines = 3  # Free tier allows up to 3 VMs
+
+# Metrics configuration (optional)
+[[metrics]]
+  port = 8081
+  path = "/metrics"

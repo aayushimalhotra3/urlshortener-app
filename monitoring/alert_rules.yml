@@ -1,0 +1,120 @@
+groups:
+  - name: urlshortener_alerts
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: (
+          sum(rate(http_requests_total{status=~"5.."}[5m])) /
+          sum(rate(http_requests_total[5m]))
+        ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+      # High response time alert
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s"
+
+      # Application down alert
+      - alert: ApplicationDown
+        expr: up{job="urlshortener"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "URL Shortener application is down"
+          description: "The URL Shortener application has been down for more than 1 minute"
+
+      # High memory usage alert
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value }}MB"
+
+      # Database operation errors
+      - alert: DatabaseErrors
+        expr: increase(db_operations_total{status="error"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Database errors detected"
+          description: "{{ $value }} database errors in the last 5 minutes"
+
+      # High database operation latency
+      - alert: HighDatabaseLatency
+        expr: histogram_quantile(0.95, sum(rate(db_operation_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High database latency detected"
+          description: "95th percentile database operation time is {{ $value }}s"
+
+      # Low URL creation rate (potential issue)
+      - alert: LowURLCreationRate
+        expr: rate(urls_shortened_total[10m]) < 0.1
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low URL creation rate"
+          description: "URL creation rate is {{ $value }} per second over the last 10 minutes"
+
+      # High 404 rate
+      - alert: High404Rate
+        expr: (
+          sum(rate(urls_not_found_total[5m])) /
+          sum(rate(urls_redirected_total[5m]))
+        ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High 404 rate detected"
+          description: "404 rate is {{ $value | humanizePercentage }} for the last 5 minutes"
+
+  - name: infrastructure_alerts
+    rules:
+      # Prometheus target down
+      - alert: PrometheusTargetDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus target is down"
+          description: "Target {{ $labels.instance }} of job {{ $labels.job }} is down"
+
+      # Prometheus configuration reload failed
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful != 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus configuration reload failed"
+          description: "Prometheus configuration reload has failed"
+
+      # High scrape duration
+      - alert: HighScrapeDuration
+        expr: scrape_duration_seconds > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High scrape duration"
+          description: "Scrape duration for {{ $labels.instance }} is {{ $value }}s"

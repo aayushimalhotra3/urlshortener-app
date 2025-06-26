@@ -1,0 +1,17 @@
+# Heroku configuration for URL Shortener
+# Uses Docker container deployment
+
+build:
+  docker:
+    web: Dockerfile
+
+run:
+  web: ./main
+
+# Release phase for database migrations
+release:
+  image: web
+  command:
+    - echo "Running database migrations..."
+    - mkdir -p /app/data
+    - echo "Application ready for deployment"

@@ -1,0 +1,88 @@
+# DigitalOcean App Platform specification
+# Free tier: $0/month for static sites, $5/month for apps
+
+name: urlshortener
+region: nyc
+
+services:
+- name: web
+  source_dir: /
+  github:
+    repo: your-username/urlapp  # Update with your GitHub repo
+    branch: main
+    deploy_on_push: true
+  
+  # Docker configuration
+  dockerfile_path: Dockerfile
+  
+  # Resource allocation (Basic plan - $5/month)
+  instance_count: 1
+  instance_size_slug: basic-xxs  # 0.5 vCPU, 0.5 GB RAM
+  
+  # Environment variables
+  envs:
+  - key: PORT
+    value: "8081"
+  - key: GIN_MODE
+    value: "release"
+  - key: LOG_LEVEL
+    value: "info"
+  - key: METRICS_ENABLED
+    value: "true"
+  - key: RATE_LIMIT_RPS
+    value: "10"
+  - key: RATE_LIMIT_BURST
+    value: "20"
+  - key: MAX_URL_LENGTH
+    value: "2048"
+  - key: DB_PATH
+    value: "/app/data/urls.db"
+  
+  # Health check configuration
+  health_check:
+    http_path: "/health"
+    initial_delay_seconds: 30
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
+  
+  # HTTP configuration
+  http_port: 8081
+  
+  # Routes
+  routes:
+  - path: /
+    preserve_path_prefix: true
+
+# Optional: Add a database (requires paid plan)
+# databases:
+# - name: urlshortener-db
+#   engine: PG
+#   version: "13"
+#   size: db-s-dev-database  # $15/month
+#   num_nodes: 1
+
+# Domain configuration (optional)
+# domains:
+# - domain: your-domain.com
+#   type: PRIMARY
+#   wildcard: false
+
+# Alerts configuration
+alerts:
+- rule: CPU_UTILIZATION
+  disabled: false
+  operator: GREATER_THAN
+  value: 80
+  window: FIVE_MINUTES
+- rule: MEM_UTILIZATION
+  disabled: false
+  operator: GREATER_THAN
+  value: 80
+  window: FIVE_MINUTES
+- rule: RESTART_COUNT
+  disabled: false
+  operator: GREATER_THAN
+  value: 5
+  window: FIVE_MINUTES

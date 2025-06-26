@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Error - URL Shortener</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .error-page {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 0;
+            line-height: 1;
+        }
+        .error-title {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 1rem 0;
+        }
+        .error-message {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin: 1.5rem 0;
+            line-height: 1.6;
+        }
+        .home-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .home-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .retry-button {
+            display: inline-block;
+            background: #95a5a6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 1rem 0.5rem 0 0.5rem;
+            transition: background 0.2s ease;
+        }
+        .retry-button:hover {
+            background: #7f8c8d;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-page">
+            <div class="icon">⚠️🔧</div>
+            <h1 class="error-code">500</h1>
+            <h2 class="error-title">Internal Server Error</h2>
+            <p class="error-message">
+                Oops! Something went wrong on our end. We're experiencing some technical difficulties.
+                <br>
+                Please try again in a moment, or contact support if the problem persists.
+            </p>
+            <div>
+                <a href="javascript:history.back()" class="retry-button">← Go Back</a>
+                <a href="/" class="home-button">🏠 Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

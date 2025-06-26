@@ -1,0 +1,51 @@
+# Google Cloud Build configuration for building and deploying to Cloud Run
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/urlshortener:$COMMIT_SHA', '.']
+    
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/urlshortener:$COMMIT_SHA']
+    
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'urlshortener'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/urlshortener:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--set-env-vars'
+      - 'GIN_MODE=release,LOG_LEVEL=info,METRICS_ENABLED=true,RATE_LIMIT_RPS=10,RATE_LIMIT_BURST=20,MAX_URL_LENGTH=2048'
+      - '--execution-environment'
+      - 'gen2'
+
+images:
+  - 'gcr.io/$PROJECT_ID/urlshortener:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+# Timeout for the entire build
+timeout: '1200s'
+
+# Substitutions for build variables
+substitutions:
+  _SERVICE_NAME: 'urlshortener'
+  _REGION: 'us-central1'

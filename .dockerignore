@@ -1,0 +1,67 @@
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+*.md
+
+# Development files
+.env
+.env.example
+.vscode
+.idea
+
+# Test files
+*_test.go
+test_*.go
+testdata
+e2e
+coverage.out
+coverage.html
+
+# Build artifacts
+bin/
+build/
+dist/
+
+# Dependencies
+node_modules/
+
+# Database files (will be created in container)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Monitoring (will be mounted as volumes)
+monitoring/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Editor files
+*.swp
+*.swo
+*~

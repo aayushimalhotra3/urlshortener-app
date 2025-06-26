@@ -1,0 +1,63 @@
+# Render.com Blueprint for URL Shortener
+# This file defines the infrastructure for deploying to Render's free tier
+
+services:
+  - type: web
+    name: urlshortener
+    env: docker
+    repo: https://github.com/YOUR_USERNAME/urlapp.git # Update this with your repo
+    region: oregon # or singapore, frankfurt, ohio
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    
+    # Environment variables
+    envVars:
+      - key: PORT
+        value: 10000  # Render uses port 10000
+      - key: GIN_MODE
+        value: release
+      - key: LOG_LEVEL
+        value: info
+      - key: METRICS_ENABLED
+        value: true
+      - key: RATE_LIMIT_RPS
+        value: 5  # Lower for free tier
+      - key: RATE_LIMIT_BURST
+        value: 10
+      - key: MAX_URL_LENGTH
+        value: 2048
+      - key: DB_PATH
+        value: /tmp/urlshortener.db
+      - key: REQUIRE_HTTPS
+        value: true
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Build command (optional, Dockerfile handles this)
+    # buildCommand: go build -o bin/urlshortener cmd/shortener/main.go
+    
+    # Start command (optional, Dockerfile handles this)
+    # startCommand: ./bin/urlshortener
+    
+    # Auto-deploy on git push
+    autoDeploy: true
+    
+    # Custom domains (optional)
+    # domains:
+    #   - your-domain.com
+    #   - www.your-domain.com
+
+# Optional: Database (not needed for SQLite)
+# databases:
+#   - name: urlshortener-db
+#     databaseName: urlshortener
+#     user: urlshortener
+#     plan: free
+
+# Optional: Redis cache
+# - type: redis
+#   name: urlshortener-cache
+#   plan: free
+#   maxmemoryPolicy: allkeys-lru
