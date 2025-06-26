@@ -11,9 +11,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const historyContainer = document.getElementById('history-container');
     const loadingOverlay = document.getElementById('loading-overlay');
     const toastContainer = document.getElementById('toast-container');
+    const analyticsContainer = document.getElementById('analytics-container');
+    const totalUrlsElement = document.getElementById('total-urls');
+    const sessionUrlsElement = document.getElementById('session-urls');
+    const successRateElement = document.getElementById('success-rate');
+    
+    // Analytics tracking
+    let sessionStats = {
+        totalAttempts: 0,
+        successfulAttempts: 0,
+        sessionUrls: 0
+    };
 
     // Load history from localStorage
     loadHistory();
+    
+    // Initialize analytics
+    updateAnalytics();
+    
+    // Analytics functions
+    function updateAnalytics() {
+        const history = JSON.parse(localStorage.getItem('urlHistory') || '[]');
+        const totalUrls = history.length;
+        
+        // Update display
+        totalUrlsElement.textContent = totalUrls;
+        sessionUrlsElement.textContent = sessionStats.sessionUrls;
+        
+        const successRate = sessionStats.totalAttempts > 0 
+            ? Math.round((sessionStats.successfulAttempts / sessionStats.totalAttempts) * 100)
+            : 100;
+        successRateElement.textContent = successRate + '%';
+        
+        // Show analytics if there's data
+        if (totalUrls > 0 || sessionStats.sessionUrls > 0) {
+            analyticsContainer.style.display = 'block';
+        }
+    }
+    
+    function trackUrlShortening(success = true) {
+        sessionStats.totalAttempts++;
+        if (success) {
+            sessionStats.successfulAttempts++;
+            sessionStats.sessionUrls++;
+        }
+        updateAnalytics();
+    }
 
     // Toast notification function
     function showToast(message, type = 'success') {
@@ -74,12 +117,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!url) {
             showError('Please enter a URL');
             showToast('URL is required', 'error');
+            trackUrlShortening(false);
             return;
         }
         
         if (!isValidUrl(url)) {
             showError('Please enter a valid URL (must start with http:// or https://)');
             showToast('Invalid URL format', 'error');
+            trackUrlShortening(false);
             return;
         }
         
@@ -102,11 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const errorMsg = errorData.error || 'Failed to shorten URL';
                     showError(errorMsg);
                     showToast(errorMsg, 'error');
+                    trackUrlShortening(false);
                 } catch {
                     // If JSON parsing fails, show generic error
                     const errorMsg = 'Failed to shorten URL';
                     showError(errorMsg);
                     showToast(errorMsg, 'error');
+                    trackUrlShortening(false);
                 }
                 return;
             }
@@ -123,6 +170,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 shortened: data.short_url
             });
             
+            // Track successful shortening
+            trackUrlShortening(true);
+            
             // Show success message
             showToast('URL shortened successfully! 🎉');
             
@@ -133,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorMsg = 'Network error. Please check your connection and try again.';
             showError(errorMsg);
             showToast(errorMsg, 'error');
+            trackUrlShortening(false);
             console.error('Error:', error);
         } finally {
             // Always hide loading state
