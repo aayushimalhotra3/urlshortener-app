@@ -1,9 +1,12 @@
 # Multi-stage build for production
 # Stage 1: Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.23-slim AS builder
 
 # Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata gcc musl-dev sqlite-dev build-base
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        git ca-certificates tzdata gcc libsqlite3-dev && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
