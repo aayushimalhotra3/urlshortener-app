@@ -60,6 +60,3 @@ EXPOSE 8081
 
 # Start the application
 CMD ["./main"]
-
-# Run the application
-CMD ["./main"]
